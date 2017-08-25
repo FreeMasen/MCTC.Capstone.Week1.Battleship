@@ -6,7 +6,8 @@ class Grid():
         #filled with a list the length of the width parameter of the letter O
         self.cells = list(lambda row: list(lambda column: 'O', range(width)), range(height))
 
-    def mark_ship(start_x, start_y, length, direction):
+    def mark(self, x, y, char):
+        self.cells[x][y] =  char
         i = 0
         if direction == 'horizontal':
             while (i < length):
@@ -15,4 +16,5 @@ class Grid():
             while(i < length):
                 self.cells[start_x][start_y + i] = 'S'
     
-    def attempt_to_hit(x, y):
+    def print(self):
+        pass
