@@ -14,8 +14,11 @@ class Player():
     def mark_hit(self, x, y):
         for name, ship in self.ships.items():
             try:
+                print('%s, %s %s' % (name, ship.coordinates, (x, y)))
                 ship.coordinates.index((x, y))
-                ship.mark_hit()
+                if ship.mark_hit():
+                    return 'You sunk my %s!' % name
+                return 'Direct hit!'
             except:
                 continue
     

@@ -40,18 +40,22 @@ class Game():
             valid_input = False
             while (True):
                 print(offender.board.offense.display() + '\n')
-                target = self.__ask_chars__('What is your next target?\n', 2)
+                target = self.__ask_chars__('What is your next target?', 2, 3)
                 try:
                     x = numbers[target[0].lower()]
-                    y = int(target[1])
+                    y = int(target[1]) - 1
+                    if (y < 0): raise ValueError()
                 except Exception as e:
                     print('The your target must be one letter and one number i.e. A1\n')
                     continue
                 bomb_result = defender.board.bomb_square(x, y)
-                if (CellState.Invalid):
+                if bomb_result == CellState.Invalid:
                     print('Invalid position, try again')
                     continue
+                if bomb_result == CellState.Hit:
+                    print(defender.mark_hit(x, y))
                 offender.board.offense.mark(x, y, bomb_result)
+                
         self.first_players_turn = not self.first_players_turn
 
     #setup
@@ -61,15 +65,15 @@ class Game():
             #while the ship has not yet been placed
             while (not ship.placed):
                 #Ask the user for the ships orientaton
-                direction = self.__get_direction__('Would you like %s (%s) to be placed vertically? [y/n]\n' % (name, ship.size))
+                direction = self.__get_direction__('Would you like %s (%s) to be placed vertically? [y/n]' % (name, ship.size))
                 #Calculate the x limit, this is needed incase the user wants to place part of the ship off the board
                 x_limit = 10 - ship.size if direction == Direction.Horizontal else 10
                 #Ask for the X axis position
-                start_x = self.__get_coordinate__('Where would you like to start %s (%s) on the x axis? [A-%s]\n' % (name, ship.size, letters[x_limit - 1]), x_limit, True)
+                start_x = self.__get_coordinate__('Where would you like to start %s (%s) on the x axis? [A-%s]' % (name, ship.size, letters[x_limit - 1]), x_limit, True)
                 #Calculate the y limit (see x_limit)
                 y_limit = 10 - ship.size if direction == Direction.Vertical else 10
                 #then ask for the Y axis position
-                start_y = self.__get_coordinate__('Where would you like to start %s on the y axis? [1-%s]\n' % (name, y_limit), y_limit)
+                start_y = self.__get_coordinate__('Where would you like to start %s on the y axis? [1-%s]' % (name, y_limit), y_limit)
                 ship.place(start_x, start_y, direction)
                 # try and place the ship
                 if (player.board.place_ship(ship)):
@@ -89,13 +93,15 @@ class Game():
         for name, ship in player.ships.items():
             print('placing %s' % name)
             while (not ship.placed):
-                direction = randint(0,1)
-                ship.direction = Direction.Vertical if (direction > 0) else Direction.Horizontal
+                direction_int = randint(0,1)
+                direction = Direction.Vertical if (direction_int > 0) else Direction.Horizontal
                 x_limit = 10 - ship.size if ship.direction == Direction.Horizontal else 10
-                ship.start_x = randint(0, x_limit)
+                start_x = randint(0, x_limit)
                 y_limit = 10 - ship.size if ship.direction == Direction.Vertical else 10
-                ship.start_y = randint(0, y_limit)
-                ship.placed = player.board.place_ship(ship)
+                start_y = randint(0, y_limit)
+                ship.place(start_x, start_y, direction)
+                if not player.board.place_ship(ship):
+                    ship.clear_placement()
         print('computer board set')
 
 
@@ -168,14 +174,19 @@ class Game():
                 #and the loop will start again
                 print('Sorry I need a number')
     
-    def __ask_chars__(self, message, length):
+    def __ask_chars__(self, message, min_length, max_length = None):
+        if (max_length is None): max_length = min_length
         while (True):
             response = self.__ask__(message)
-            if (len(response) == length):
-                print('returning %s positions 0 through %s' % (response, length - 1))
-                chars = response[0:length]
-                return tuple(chars)
-            print('Sorry the input must be a %s letter(s).' % length)
+            res_len = len(response)
+            if res_len < min_length:
+                print('Sorry the input must be at least %s letter(s).' % length)
+                continue
+            if res_len > max_length:
+                print('Sorry, the input must be less than %s', max_length + 1)
+                continue
+            chars = response[0:max_length]
+            return tuple(chars)
     
     #play
     def __auto_turn__(self, offender, defender):

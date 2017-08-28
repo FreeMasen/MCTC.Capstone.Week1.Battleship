@@ -11,7 +11,7 @@ class Board():
         cell = self.defense.cells[y][x]
         if (cell.state == CellState.Occupied):
             self.defense.mark(x, y, CellState.Hit)
-        if (cell.state == CellState.Open):
+        elif (cell.state == CellState.Open):
             self.defense.mark(x, y, CellState.Missed)
         else:
             return CellState.Invalid

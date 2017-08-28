@@ -14,6 +14,8 @@ class Grid():
         self.cells[y][x].state = state
     
     def check(self, x, y, desired_state):
+        if (x >= self.width): return False
+        if (y >= self.height): return False
         return self.cells[y][x].state == desired_state
     
     def display(self):

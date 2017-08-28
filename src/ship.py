@@ -14,12 +14,15 @@ class Ship():
             x = start_x + i if direction == Direction.Horizontal else start_x
             y = start_y + i if direction == Direction.Vertical else start_y
             self.coordinates.append((x, y))
+            self.placed = True
     
-    def mark_hit():
-        hits += 1
+    def mark_hit(self):
+        self.hits += 1
+        return self.__is_sunk__()
 
     def clear_placement(self):
         self.coordinates = list()
+        self.placed = False
 
-    def is_sunk(self):
+    def __is_sunk__(self):
         return self.size <= self.hits
