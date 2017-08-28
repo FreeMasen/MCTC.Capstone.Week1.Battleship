@@ -2,7 +2,9 @@ from src.player import Player
 from src.ship import Ship
 from src.direction import Direction
 from src.grid import letters
+from src.cell_state import CellState
 from random import randint
+import sys
 
 #map of letters to indicies
 numbers = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9}
@@ -17,7 +19,10 @@ class Game():
 
     def setup(self):
         print('Let place Player 1\'s ships!')
-        self.__setup_player__(self.player_one)
+        if (not self.__ask_bool__('Auto-place?')):
+            self.__setup_player__(self.player_one)
+        else:
+            self.__auto_setup__(self.player_one)
         if (self.two_player):
             self.__setup_player__(self.player_two)
         else:
@@ -37,10 +42,10 @@ class Game():
                 print(offender.board.offense.display() + '\n')
                 target = self.__ask_chars__('What is your next target?\n', 2)
                 try:
-                    x = numbers[target[0]]
+                    x = numbers[target[0].lower()]
                     y = int(target[1])
                 except Exception as e:
-                    print('The first index of your move must be a-j\n')
+                    print('The your target must be one letter and one number i.e. A1\n')
                     continue
                 bomb_result = defender.board.bomb_square(x, y)
                 if (CellState.Invalid):
@@ -135,7 +140,7 @@ class Game():
         #loop until return
         while (True):
             #ask the question
-            res = input(message)
+            res = self.__ask__(message)
             #if the length of the response is less than 1
             if len(res) < 1:
                 #display the error message and start the loop again
@@ -157,7 +162,7 @@ class Game():
             try:
                 #try and get the input as an int, 
                 #if no error is raised, return the value
-                return int(input(message))
+                return int(self.__ask__(message))
             except Exception as e:
                 #if an erro is raised, display the error message 
                 #and the loop will start again
@@ -165,7 +170,7 @@ class Game():
     
     def __ask_chars__(self, message, length):
         while (True):
-            response = input(message)
+            response = self.__ask__(message)
             if (len(response) == length):
                 print('returning %s positions 0 through %s' % (response, length - 1))
                 chars = response[0:length]
@@ -183,3 +188,13 @@ class Game():
                 continue
             result = 'hit' if bomb_result == CellState.Hit else 'miss'
             print('Computer plays %s%s scores a %s.' (letters[move_x], move_y, result))
+    
+    def __ask__(self, question):
+        try:
+            return input(question + '\n')
+        except Exception as e:
+            self.__exit__()
+    
+    def __exit__(self):
+        print('Thanks for playing!')
+        sys.exit()
