@@ -1,4 +1,7 @@
 from src.cell import Cell
+
+letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+
 class Grid():
     def __init__(self, width, height):
         self.width = width
@@ -8,7 +11,10 @@ class Grid():
         self.cells = list(map(lambda row: list(map(lambda cell: Cell(), range(height))), range(width)))
 
     def mark(self, x, y, state):
-        self.cells[x][y].state = state
+        self.cells[y][x].state = state
+    
+    def check(self, x, y, desired_state):
+        return self.cells[y][x].state == desired_state
     
     def display(self):
         ret = self.__table_top__() + '\n'
@@ -20,23 +26,26 @@ class Grid():
         return ret
 
     def __table_top__(self):
-        ret = '    '
+        ret = '     '
         for i in range(self.width):
-            ret += '%s   ' % i
+            ret += '%s   ' % letters[i]
         ret += '\n'
-        return ret + '  ┌' + ('───┬' * (self.width - 1)) + '───┐'
+        return ret + '   ┌' + ('───┬' * (self.width - 1)) + '───┐'
 
     def __row_border__(self):
-        ret = '  ├'
+        ret = '   ├'
         for i in range(self.width - 1):
             ret += '───┼'
         return ret + '───┤'
 
     def __row_string__(self, index): 
-        ret = '%s │' % index
+        ret = ''
+        if (index < 9):
+            ret += ' '
+        ret += '%s │' % (index + 1)
         for cell in self.cells[index]:
             ret += ' %s │' % cell.display()
         return ret
 
     def __table_bottom__(self):
-        return '  └' + ('───┴' * (self.width - 1)) + '───┘'
+        return '   └' + ('───┴' * (self.width - 1)) + '───┘'
