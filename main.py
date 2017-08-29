@@ -5,10 +5,14 @@ from src.direction import Direction
 from src.player import Player
 from src.ship import Ship
 from src.game import Game
+from src.data import Data
+
 from pyfiglet import Figlet
 
 def main():
-    print(banner() + '\n')
+    d = Data()
+    g = Game()
+    d.insert_game(g)
     # game = Game()
     # game.setup()
     # while not game.game_over:
