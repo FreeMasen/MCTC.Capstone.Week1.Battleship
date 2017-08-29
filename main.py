@@ -6,17 +6,26 @@ from src.player import Player
 from src.ship import Ship
 from src.game import Game
 from src.data import Data
-
+import inspect
 from pyfiglet import Figlet
 
 def main():
-    d = Data()
+   
     g = Game()
-    d.insert_game(g)
+    print(dir(g))
+    print('\n')
+    
+    print_obj(g)
     # game = Game()
     # game.setup()
     # while not game.game_over:
     #     game.take_turn()
+
+def print_obj(obj):
+    for key in obj.__dict__:
+        val = obj.__dict__[key]
+        print('%s: %s' % (key, type(val)))
+        
 
 def banner():
     f = Figlet(font='trek')
