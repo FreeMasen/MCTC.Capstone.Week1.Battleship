@@ -1,6 +1,15 @@
 # MCTC.Capstone.
 ## Week1
-### Battleship
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║    dBBBBb dBBBBBb  dBBBBBBP dBBBBBBP dBP    dBBBP.dBBBBP   dBP dBP dBP dBBBBBb║
+║       dBP      BB                                BP                        dB'║
+║   dBBBK'   dBP BB   dBP      dBP   dBP    dBBP   `BBBBb  dBBBBBP dBP   dBBBP' ║
+║  dB' db   dBP  BB  dBP      dBP   dBP    dBP        dBP dBP dBP dBP   dBP     ║
+║ dBBBBP'  dBBBBBBB dBP      dBP   dBBBBP dBBBBP dBBBBP' dBP dBP dBP   dBP      ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+```
 
 #### Installing
 run the following series of commands to run the project
