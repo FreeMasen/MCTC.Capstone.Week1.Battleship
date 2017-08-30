@@ -49,18 +49,18 @@ class Game():
                     x, y = self.__ask_for_target__()
                     if (y < 0 or y > 9): raise ValueError()
                 except Exception as e:
-                    self.__display_status__('Invalid position')
-                    # print('The your target must be one letter and one number i.e. A1\n')
+                    print(figlet.renderText('Invalid target'))
+                    print('The your target must be one letter and one number i.e. A1\n')
                     continue
                 bomb_result = defender.board.bomb_square(x, y)
                 if bomb_result == CellState.Invalid:
-                    self.__display_status__('Invalid position')
-                    # print('have you already played there?')
+                    print(figlet.renderText('Invalid target'))
+                    print('have you already played there?')
                     continue
                 if bomb_result == CellState.Hit:
-                    self.__display_status__(defender.mark_hit(x, y))
+                    print(figlet.renderText(defender.mark_hit(x, y)))
                 elif bomb_result == CellState.Missed:
-                    self.__display_status__('Miss!')
+                    print(figlet.renderText(('Miss!')))
                 offender.board.offense.mark(x, y, bomb_result)
                 break
         self.first_players_turn = not self.first_players_turn
