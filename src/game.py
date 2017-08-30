@@ -1,25 +1,29 @@
 from src.player import Player
 from src.ship import Ship
 from src.direction import Direction
-from src.grid import letters
 from src.cell_state import CellState
+from src.intro import Intro
 from random import randint
-import sys
 
-#map of letters to indicies
-numbers = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9}
+from src.consts import *
 
 class Game():
     def __init__(self, two_payer = False):
         self.player_one = Player()
         self.player_two = Player()
         self.first_players_turn = True
-        self.game_over = False
         self.two_player = two_payer
+
+    def welcom_user(self):
+        clear()
+        intro = Intro()
+        print(intro.banner() + '\n')
+        if self.__ask_bool__('Would you like to start with a tutorial?'):
+            print(intro.rules())
 
     def setup(self):
         print('Let place Player 1\'s ships!')
-        if (not self.__ask_bool__('Auto-place?')):
+        if (not self.__ask_bool__('Would you like me to place your ships for you?')):
             self.__setup_player__(self.player_one)
         else:
             self.__auto_setup__(self.player_one)
@@ -27,6 +31,8 @@ class Game():
             self.__setup_player__(self.player_two)
         else:
             self.__auto_setup__(self.player_two)
+        clear()
+        print(figlet.renderText('Let\'s go!'))
 
     def take_turn(self):
         offender = self.player_two
@@ -34,30 +40,61 @@ class Game():
         if self.first_players_turn:
             offender = self.player_one
             defender = self.player_two
-        if self.two_player and not self.first_players_turn:
+        if not self.two_player and not self.first_players_turn:
             self.__auto_turn__(offender, defender)
         else:
-            valid_input = False
             while (True):
-                print(offender.board.offense.display() + '\n')
-                target = self.__ask_chars__('What is your next target?', 2, 3)
+                print(offender.display_board() + '\n')
                 try:
-                    x = numbers[target[0].lower()]
-                    y = int(target[1]) - 1
-                    if (y < 0): raise ValueError()
+                    x, y = self.__ask_for_target__()
+                    if (y < 0 or y > 9): raise ValueError()
                 except Exception as e:
-                    print('The your target must be one letter and one number i.e. A1\n')
+                    self.__display_status__('Invalid position')
+                    # print('The your target must be one letter and one number i.e. A1\n')
                     continue
                 bomb_result = defender.board.bomb_square(x, y)
                 if bomb_result == CellState.Invalid:
-                    print('Invalid position, try again')
+                    self.__display_status__('Invalid position')
+                    # print('have you already played there?')
                     continue
                 if bomb_result == CellState.Hit:
-                    print(defender.mark_hit(x, y))
+                    self.__display_status__(defender.mark_hit(x, y))
+                elif bomb_result == CellState.Missed:
+                    self.__display_status__('Miss!')
                 offender.board.offense.mark(x, y, bomb_result)
-                
+                break
         self.first_players_turn = not self.first_players_turn
+        return self.__check_for_continue__()
+        
+    def __display_status__(self, last_result):
+        return wrap_in_box(side_by_side(figlet.renderText('Last shot'), figlet.renderText(last_result), 'Ships', self.__ship_table__()))
 
+    def __ship_table__(self):
+        p1_ships = 'Your ships\n'
+        p2_ships = 'Their ships'
+        for name, ship in self.player_one.ships.items():
+            p1_ships += '%s: %s/%s\n'% (name, ship.hits, ship.size)
+        for name, ship in self.player_two.ships.items():
+            p2_ships += '%s: %s/%s\n'% (name, ship.hits, ship.size)
+        p1_lines = p1_ships.split('\n')
+        p2_lines = p2_ships.split('\n')
+        p1_width = max(map(lambda line: len(line), p1_lines))
+        p2_width = max(map(lambda line: len(line), p2_lines))
+        p1_lines[0] = p1_lines[0].center(p1_width)
+        p2_lines[0] = p1_lines[0].center(p2_width)
+        ret = ''
+        p1_height = len(p1_lines)
+        p2_height = len(p2_lines)
+        target_height = max([p1_height, p2_height])
+        for i in range(target_height):
+            left = p1_lines[i] if i < p1_height else ' ' * p1_width
+            right = p2_lines[i] if i < p2_height else ' ' * p2_width
+            ret += left + '  ' + right
+        return wrap_in_box(ret)
+        
+
+    def play_again(self):
+        return self.__ask_bool__('Would you like to play again?')
     #setup
     def __setup_player__(self, player):
         #loop over the player's ship dictionary
@@ -88,10 +125,10 @@ class Game():
                     #if not successful, start from the top with this ship
                     print('Sorry, stacking your ships would be cheating\n')
 
-    def __auto_setup__(self, player):
-        print('Setting up the computer\'s board')
+    def __auto_setup__(self, player, is_computer = True):
+        player_name = 'the computer' if is_computer else 'player_one'
+        print('Setting up %s\'s board' % player_name)
         for name, ship in player.ships.items():
-            print('placing %s' % name)
             while (not ship.placed):
                 direction_int = randint(0,1)
                 direction = Direction.Vertical if (direction_int > 0) else Direction.Horizontal
@@ -102,7 +139,6 @@ class Game():
                 ship.place(start_x, start_y, direction)
                 if not player.board.place_ship(ship):
                     ship.clear_placement()
-        print('computer board set')
 
 
 
@@ -126,7 +162,6 @@ class Game():
         while (True):
             if (x):
                 chars = self.__ask_chars__(message, 1)[0]
-                print(chars)
                 char = chars[0]
                 try:
                     return numbers[char.lower()]
@@ -141,7 +176,37 @@ class Game():
                     return coordinate - 1
             #if we made it here, display the error message and the loop will start again
             print('Sorry, it would be unfair to place this ship off the grid\n')
+    #play
+    def __auto_turn__(self, offender, defender):
+        while (True):
+            move_x = randint(0,9)
+            move_y = randint(0,9)
+            bomb_result = defender.board.bomb_square(move_x, move_y)
+            if (bomb_result == CellState.Invalid):
+                continue
+            result = 'hit' if bomb_result == CellState.Hit else 'miss'
+            print('Computer plays %s%s scores a %s.' % (letters[move_x], move_y, result))
+            break
+    
+    def __ask_for_target__(self):
+        target = self.__ask_chars__('What is your next target?', 2, 3)
+        x_char = target[0]
+        x = numbers[x_char]
+        y_chars = ''.join(target[1:])
+        y = int(y_chars)
+        clear()
+        return (x, y - 1)
 
+    def __check_for_continue__(self):
+        if self.player_one.has_lost():
+            print('Player two wins!')
+            return False
+        if self.player_two.has_lost():
+            print('Player one wins!')
+            return False
+        return True
+    
+    #interaction
     def __ask_bool__(self, message):
         #loop until return
         while (True):
@@ -187,25 +252,14 @@ class Game():
                 continue
             chars = response[0:max_length]
             return tuple(chars)
-    
-    #play
-    def __auto_turn__(self, offender, defender):
-        print('Calculating computer\'s move.')
-        while (True):
-            move_x = randint(0,9)
-            move_y = randint(0,9)
-            bomb_result = defender.board.bomb_square(move_x, move_y)
-            if (bomb_result == CellState.Invalid):
-                continue
-            result = 'hit' if bomb_result == CellState.Hit else 'miss'
-            print('Computer plays %s%s scores a %s.' (letters[move_x], move_y, result))
-    
+
     def __ask__(self, question):
         try:
             return input(question + '\n')
         except Exception as e:
-            self.__exit__()
+            self.exit()
     
-    def __exit__(self):
+    def exit(self):
         print('Thanks for playing!')
         sys.exit()
+

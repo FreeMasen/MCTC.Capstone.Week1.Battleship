@@ -1,6 +1,5 @@
 from src.cell import Cell
-
-letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
+from src.consts import letters
 
 class Grid():
     def __init__(self, width, height):

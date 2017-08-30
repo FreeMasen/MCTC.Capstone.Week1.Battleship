@@ -18,11 +18,11 @@ class Ship():
     
     def mark_hit(self):
         self.hits += 1
-        return self.__is_sunk__()
+        return self.is_sunk()
 
     def clear_placement(self):
         self.coordinates = list()
         self.placed = False
 
-    def __is_sunk__(self):
+    def is_sunk(self):
         return self.size <= self.hits

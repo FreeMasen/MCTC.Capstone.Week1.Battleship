@@ -5,30 +5,18 @@ from src.direction import Direction
 from src.player import Player
 from src.ship import Ship
 from src.game import Game
-from pyfiglet import Figlet
 
 def main():
-    print(banner() + '\n')
-    # game = Game()
-    # game.setup()
-    # while not game.game_over:
-    #     game.take_turn()
-
-def banner():
-    f = Figlet(font='trek')
-    name = f.renderText('Battleship')
-    lines = name.split('\n')
-    width = len(lines[0])
-    newLines = list()
-    for line in lines:
-        line = '│' + line  + '│'
-    top = '┌' + ('─' * width) + '┐'
-    lines.insert(0, top)
-    bottom = '└' + ('─' * width) + '┘'
-    lines.append(bottom)
-    return '\n'.join(lines)
-    
-
+    game = Game()
+    game.__check_for_continue__()
+    game.welcom_user()
+    next_game = True
+    while next_game:
+        game.setup()
+        while game.take_turn():
+            pass
+        next_game = game.play_again()
+    game.exit()
 
 if __name__ == "__main__":
     main()
