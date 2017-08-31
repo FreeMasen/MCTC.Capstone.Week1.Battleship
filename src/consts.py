@@ -4,7 +4,7 @@ from pyfiglet import Figlet
 numbers = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7, 'i': 8, 'j': 9}
 
 letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-figlet = Figlet('rectangles')
+figlet = Figlet('rectangles', width=150)
 
 # clear the terminal window
 #https://stackoverflow.com/questions/2084508/clear-terminal-in-python
@@ -28,7 +28,7 @@ def side_by_side(left_banner, left_grid, right_banner, right_grid):
     right_text = right_banner.split('\n') + right_grid.split('\n')
     left_width = max(map(lambda line: len(line), left_text))
     right_width = max(map(lambda line: len(line), right_text))
-    left = list(map(lambda line: line.center(left_width), left_text))
+    left = list(map(lambda line: line.ljust(left_width), left_text))
     left_height = len(left)
     right_height = len(right_text)
     height = max(left_height, right_height)

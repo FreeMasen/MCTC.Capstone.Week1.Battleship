@@ -2,7 +2,7 @@ from enum import Enum
 
 class CellState(Enum):
     Open = '~'
-    Occupied = '◼︎'
+    Occupied = '■'
     Hit = '╿' 
-    Missed = '╳'
+    Missed = 'X'
     Invalid = ''
